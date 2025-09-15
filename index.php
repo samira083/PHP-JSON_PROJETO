@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-br">
 <head>
 <meta charset="utf-8">
-<title>Checklist simples</title>
+<title>Checklist Dark</title>
 <style>
 html, body {
     height: 100%;
@@ -70,6 +70,18 @@ html, body {
 }
 
 body {
+    font-family: Arial, sans-serif;
+    background-color: #6d1c1cff; /* fundo escuro sólido */
+    background-image: 
+        radial-gradient(circle, rgba(94, 15, 15, 1) 1px, transparent 1px),
+        radial-gradient(circle, rgba(125, 20, 20, 0.84) 1px, transparent 1px);
+    background-position: 0 0, 25px 25px; /* posição dos símbolos */
+    background-size: 50px 50px; /* espaçamento */
+    color: #f5f5dc; /* texto claro */
+    margin: 0;
+    padding: 0;
+
+
     font-family: Arial, sans-serif;
     background-image: url('https://images.wallpapers.com/wallpapers/lo-fi-background-digital-art-1eal6irnz09bvq45.jpg'); 
     background-size: cover;
@@ -81,26 +93,29 @@ body {
 }
 
 .container {
-    background: rgba(245, 222, 179, 0.85); /* leve tom marrom claro, sem perder visibilidade */
-    padding: 20px;
+    background: rgba(30,30,30,0.85); /* fundo dark semi-transparente */
+    padding: 25px;
     border-radius: 12px;
     width: 90%;
     max-width: 700px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    color: #f5f5dc; /* texto claro */
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
-    color: #4b2e1e; /* tom marrom mais escuro */
+    color: #f5f5dc; /* tom creme */
 }
 
 input[type="text"] {
     padding: 10px;
     width: 70%;
-    border-radius: 12px; /* bordas arredondadas */
-    border: 1px solid #ccc;
+    border-radius: 12px;
+    border: 1px solid #555;
     outline: none;
+    background-color: #222;
+    color: #f5f5dc;
 }
 
 button {
@@ -108,16 +123,17 @@ button {
     border-radius: 12px;
     border: none;
     cursor: pointer;
+    background-color: #444;
+    color: #f5f5dc;
 }
 
 button.delete {
     background:#e74c3c;
-    color:white;
 }
 
 .done { 
     text-decoration: line-through; 
-    color: gray;
+    color: #999;
 }
 
 ul { 
@@ -141,16 +157,14 @@ form.inline { display:inline; margin:0; }
 <div class="container">
     <h1>MEU CHECKLIST</h1>
 
-    <!-- Formulário para adicionar tarefa -->
     <form method="post">
         <input type="hidden" name="action" value="add">
         <input type="text" name="titulo" placeholder="Digite uma tarefa" required>
         <button type="submit">Adicionar</button>
     </form>
 
-    <hr>
+    <hr style="border-color:#555;">
 
-    <!-- Lista de tarefas -->
     <ul>
     <?php if (empty($tarefas)): ?>
         <li>Nenhuma tarefa ainda...</li>
