@@ -7,18 +7,16 @@ if (!file_exists($file)) {
     file_put_contents($file, json_encode([], JSON_PRETTY_PRINT), LOCK_EX);
 }
 
-// 1) Lê o JSON e transforma em array PHP
+// Lê o JSON e transforma em array PHP
 $tarefas = json_decode(file_get_contents($file), true);
 
-// 2) Tratar requisições POST (adicionar, alternar status, deletar)
+// Tratar requisições POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'add') {
-        // Adiciona nova tarefa
         $titulo = trim($_POST['titulo'] ?? '');
         if ($titulo !== '') {
-            // Gera id seguro (max id + 1) para não duplicar quando remover itens
             $maxId = 0;
             foreach ($tarefas as $t) {
                 if (isset($t['id']) && $t['id'] > $maxId) $maxId = $t['id'];
@@ -33,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             file_put_contents($file, json_encode($tarefas, JSON_PRETTY_PRINT), LOCK_EX);
         }
     } elseif ($action === 'toggle') {
-        // Alterna status com base na presença do campo 'done' (checkbox envia só quando checado)
         $id = intval($_POST['id'] ?? 0);
         $novoStatus = isset($_POST['done']) ? 'concluída' : 'pendente';
         foreach ($tarefas as &$t) {
@@ -45,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         unset($t);
         file_put_contents($file, json_encode($tarefas, JSON_PRETTY_PRINT), LOCK_EX);
     } elseif ($action === 'delete') {
-        // Remove pelo id
         $id = intval($_POST['id'] ?? 0);
         foreach ($tarefas as $k => $t) {
             if ($t['id'] == $id) {
@@ -53,12 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             }
         }
-        // reindexa o array pra ficar bonito
         $tarefas = array_values($tarefas);
         file_put_contents($file, json_encode($tarefas, JSON_PRETTY_PRINT), LOCK_EX);
     }
 
-    // Redireciona para evitar reenvio do formulário (boa prática)
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
 }
@@ -69,18 +63,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="utf-8">
 <title>Checklist simples</title>
 <style>
-    body { font-family: Arial, sans-serif; max-width:700px; margin:20px auto; }
-    .done { text-decoration: line-through; color: gray; }
-    ul { list-style: none; padding: 0; }
-    li { margin: 8px 0; display:flex; align-items:center; gap:8px; }
-    .task-title { flex:1; }
-    form.inline { display:inline; margin:0; }
-    button.delete { background:#e74c3c; color:white; border:0; padding:4px 8px; cursor:pointer; border-radius:4px; }
-    input[type="text"]{ padding:6px; width:70%; }
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('https://images.wallpapers.com/wallpapers/lo-fi-background-digital-art-1eal6irnz09bvq45.jpg'); 
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.container {
+    background: rgba(245, 222, 179, 0.85); /* leve tom marrom claro, sem perder visibilidade */
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #4b2e1e; /* tom marrom mais escuro */
+}
+
+input[type="text"] {
+    padding: 10px;
+    width: 70%;
+    border-radius: 12px; /* bordas arredondadas */
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+button {
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+}
+
+button.delete {
+    background:#e74c3c;
+    color:white;
+}
+
+.done { 
+    text-decoration: line-through; 
+    color: gray;
+}
+
+ul { 
+    list-style: none; 
+    padding: 0; 
+    margin-top: 20px;
+}
+
+li { 
+    margin: 8px 0; 
+    display:flex; 
+    align-items:center; 
+    gap:8px; 
+}
+
+.task-title { flex:1; }
+form.inline { display:inline; margin:0; }
 </style>
 </head>
 <body>
-    <h1>Meu Checklist</h1>
+<div class="container">
+    <h1>MEU CHECKLIST</h1>
 
     <!-- Formulário para adicionar tarefa -->
     <form method="post">
@@ -94,24 +153,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Lista de tarefas -->
     <ul>
     <?php if (empty($tarefas)): ?>
-        <li>Nenhuma tarefa ainda.</li>
+        <li>Nenhuma tarefa ainda...</li>
     <?php else: ?>
         <?php foreach ($tarefas as $t): ?>
             <li>
-                <!-- Form para alternar status (checkbox) -->
                 <form class="inline" method="post">
                     <input type="hidden" name="action" value="toggle">
                     <input type="hidden" name="id" value="<?= intval($t['id']) ?>">
-                    <!-- o checkbox só envia 'done' se estiver marcado -->
                     <input type="checkbox" name="done" onchange="this.form.submit()" <?= ($t['status'] === 'concluída') ? 'checked' : '' ?>>
                 </form>
 
-                <!-- Título (escapado para segurança) -->
                 <span class="task-title <?= ($t['status'] === 'concluída') ? 'done' : '' ?>">
                     <?= htmlspecialchars($t['titulo'], ENT_QUOTES, 'UTF-8') ?>
                 </span>
 
-                <!-- Botão de deletar -->
                 <form class="inline" method="post" onsubmit="return confirm('Remover essa tarefa?');">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" value="<?= intval($t['id']) ?>">
@@ -121,5 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endforeach; ?>
     <?php endif; ?>
     </ul>
+</div>
 </body>
 </html>
