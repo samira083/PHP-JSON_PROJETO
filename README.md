@@ -14,9 +14,9 @@ O projeto foi criado como um exercício para:
 ---
 
 ## TECNOLOGIAS UTILIZADAS
-- **PHP** – Para manipulação de arquivos JSON e lógica do backend.
 - **JSON** – Formato de armazenamento dos dados.
-- **HTML** – Estruturação do frontend e exibição dos dados.
+- **PHP** – Para manipulação de arquivos JSON e lógica do backend.
+- **HTML** – Estruturação do frontend e exibição dos dados, dentro do json.
 
 ---
 
